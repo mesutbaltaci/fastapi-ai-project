@@ -1,0 +1,36 @@
+services: #docker compose expects
+  backend: 
+    build:
+      context: ./backend  #path to the Dockerfile, local directory
+      dockerfile: Dockerfile
+    ports:
+      - 8080:8000
+    command: uvicorn main:app  --host 0.0.0.0 --port 8000 --reload
+    environment:
+      - PORT=8000
+      - MY_PROJECT_NAME=ai app
+    env_file:
+      - .env.sample
+    volumes:
+      - ./backend/src:/app
+    develop:
+      watch:
+        - action: rebuild
+          path: backend/requirements.txt
+        - action: rebuild
+          path: backend/Dockerfile
+        - action: restart
+          path: backend/src
+          
+        
+  static_html: #cutome keyname
+    build:
+      context: ./static_html  #path to the Dockerfile, local directory
+      dockerfile: static.Dockerfile
+    ports:
+      - 8000:8000
+      - 3000:8001
+    command: python -m http.server 8000
+    volumes:
+      - ./static_html/src:/app
+
